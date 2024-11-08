@@ -1,0 +1,72 @@
+#
+# This makefile is configured for Microsoft Visual C under
+# Windows.
+#
+
+CC=cl
+DEFS=-DNEED_BASENAME -DNEED_DIRNAME -D_WINDOWS 
+# -D_DOS -D__DOS__ -D_DOS_ -DDOS
+CPPFLAGS=-I.
+CFLAGS=-Yd -nologo -Zi -Gz
+LDFLAGS=
+
+RM=del
+
+# Some older Visual C compilers may need these options
+# CFLAGS+=-I<VC-include-path>
+# LDFLAGS+=-link -libpath:<VC-lib-path>
+
+SRC=vanilla.c dataset.c header.c dir.c convert.c fields.c select.c \
+		buffs.c output.c search.c tools.c io_lablib3.c \
+		fake.c ff_t20.c ff_irtm.c \
+		mem.c system.c \
+		vidx.c vidxuse.c vidxbits.c \
+		rough_ct.c \
+		logging.c
+
+INC=header.h tools.h gendef.h proto.h io_lablib3.h toolbox.h tools.h version.h fake.h output.h ff_irtm.h mem.h dos.h system.h vidx.h vidx.h
+
+OBJ=$(SRC:.c=.obj)
+
+.SUFFIXES: .obj .lib
+
+.c.obj:
+	$(CC) -c $(DEFS) $(CPPFLAGS) $(CFLAGS) $< -Fo$@
+
+vanilla.exe:	$(OBJ)
+	$(CC) $(CFLAGS) $(OBJ) -MLd $(LDFLAGS) -Fe$@
+
+gen_irtm.exe: gen_irtm.c
+	$(CC) gen_irtm.c -Fo$@
+	gen_irtm > ff_irtm.h
+
+clean:
+	$(RM) $(OBJ) vanilla.exe
+
+vanilla.obj: vanilla.c header.h tools.h gendef.h proto.h version.h \
+ output.h
+dataset.obj: dataset.c header.h tools.h gendef.h proto.h system.h
+header.obj: header.c header.h tools.h gendef.h proto.h io_lablib3.h \
+ toolbox.h
+dir.obj: dir.c tools.h gendef.h system.h
+convert.obj: convert.c header.h tools.h gendef.h proto.h mem.h
+fields.obj: fields.c header.h tools.h gendef.h proto.h
+select.obj: select.c header.h tools.h gendef.h proto.h
+buffs.obj: buffs.c header.h tools.h gendef.h proto.h mem.h
+output.obj: output.c header.h tools.h gendef.h proto.h output.h
+search.obj: search.c header.h tools.h gendef.h proto.h
+tools.obj: tools.c tools.h gendef.h
+io_lablib3.obj: io_lablib3.c header.h tools.h gendef.h proto.h \
+ io_lablib3.h toolbox.h
+fake.obj: fake.c header.h tools.h gendef.h proto.h output.h fake.h
+ff_t20.obj: ff_t20.c fake.h header.h tools.h gendef.h proto.h output.h
+ff_irtm.obj: ff_irtm.c fake.h header.h tools.h gendef.h proto.h output.h \
+ ff_irtm.h
+mem.obj: mem.c
+vidx.obj: vidx.h header.h
+system.obj: system.c
+vidxuse.obj: vidxuse.c vidx.h header.h tools.h gendef.h proto.h \
+ mem.h
+logging.obj: logging.c
+vidxbits.obj: vidxbits.c vidxbits.h
+rough_ct.obj: rough_ct.c header.h tools.h gendef.h proto.h

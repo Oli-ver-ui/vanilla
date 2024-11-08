@@ -1,0 +1,154 @@
+PDS_VERSION_ID                   = PDS3
+RECORD_TYPE                      = STREAM
+OBJECT                           = TEXT
+  PUBLICATION_DATE               = 2002-01-01
+  NOTE                           = "Description of the SRC
+     directory contents for a MGS TES-TSDR archive volume."
+END_OBJECT                       = TEXT
+END
+
+                        SRC Directory Contents
+
+     The SRC directory contains source code for using the data on the
+TES-TSDR archive volume.  The files listed below are found in this directory.
+
+SRCINFO.TXT -   The file you are reading.
+
+BUFFS.C -       Vanilla source code for data buffering and buffer management.
+
+CONVERT.C -     Vanilla source code for data conversions.
+
+DATASET.C -     Vanilla source code for processing the DATASET file.
+
+DIR.C -         Vanilla source code for retrieving lists of data fragments 
+                from a directory.
+
+DOS.H -         Vanilla source code for DOS/Windows definitions. 
+
+FAKE.C -        Vanilla source code for fake fields.
+
+FAKE.H -        Header for fake fields.
+
+FF_IRTM.C -     Vanilla source code for generating IRTM channel data.
+
+FF_IRTM.H -     Temperature lookup tables for IRTM channels.
+
+FF_T20.C -      Vanilla source code for generating IRTM "T20" channel in 
+                thermal inertia processing.
+
+FIELDS.C -      Vanilla source code for determining "-fields" options.
+
+GEN_IRTM.C -    Vanilla source code for generating FF_IRTM.H.
+
+GENDEF.H -      General purpose definitions for cross-platform use of 
+                vanilla.
+
+HEADER.C -      Vanilla source code for processing PDS Headers.
+
+HEADER.H -      Header for PDS Header processing code.
+
+IO_LABLIB3.C -  Vanilla source code for parsing PDS Headers.
+
+IO_LABLIB3.H -  Header for PDS Header parsing code.
+
+LOGGING.C -     Vanilla source code to log user execution information.
+
+MAKEFILE -      Vanilla Makefile for UNIX platforms.
+
+MAKEFILE.WIN -  Vanilla Makefile for Windows platforms.
+
+MEM.C -         Vanilla source code for system dependent memory management.
+
+MEM.H -         Header for system dependent memory management.
+
+OUTPUT.C -      Vanilla source code for text/binary output setup and
+                generation.
+
+OUTPUT.H -      Header for text/binary output setup and generation.
+
+PROTO.H -       Vanilla source code for common systems prototype.
+
+ROUGH_CT.C -    Vanilla source code for generating rough count.
+
+ROUGH_CT.H -    Header for generating rough count.
+
+SEARCH.C -      Vanilla source code for search engine.
+
+SELECT.C -      Vanilla source code for determining "-select" options.
+
+SYSTEM.C -      Vanilla source code to complement unavailable routines in 
+                cross-platform use of vanilla.
+
+SYSTEM.H -      Header for cross-platform unavailable routines.
+
+TOOLBOX.H -     Miscellaneous vanilla source codes.
+
+TOOLS.C -       Vanilla source code defining order of implementation.
+
+TOOLS.H -       Header for definition of implementation order.
+
+VANILLA.C -     Main body of vanilla source code, includes argument 
+                processing.
+
+VERSION.H -     Version logs and vanilla fix descriptions (header).
+
+VIDX.C -        Vanilla source code for creating indicies.
+
+VIDX.H -        Header for creating indicies.
+
+VIDXBITS.C -    Vanilla source code for bit-field based sorting routines.
+
+VIDXBITS.H -    Header for bit-field based sorting routines.
+
+VIDXUSE.C -     Vanilla source code for using indicies to search.
+
+
+
+
+                       Notes on Compiling Vanilla
+                       --------------------------
+Vanilla requires an ANSI C compiler, and has been successfully compiled in
+the following environments:
+
+    * Sun Sparc, Solaris 7
+    * Red Hat Linux 7.2, gcc
+    * SGI O2 (mips), IRIX V6.5
+    * IBM RS/6000,  AIX V4.3.3
+    * HP 9000/735, PA-RISC 1.1, HP-UX 11.00
+    * Windows2000/NT/98/95, Microsoft Visual C++
+
+Binary executables are available for each of these in the SOFTWARE/BIN
+directory.  See the bininfo.txt file in that directory for details.
+
+The available binaries have the logging capabilities turned off by 
+default.  To activate this option, you must edit the appropriate Makefile
+then compile vanilla for your platform as described below.  To activate 
+the logging capability, remove the "#" at the beginning of the line 
+"#CFLAGS+=-DLOGGING".
+
+If you are compiling on an HP or Intel platform, you will need to modify 
+the Makefile to select the CFLAGS line that matches your environment.  
+If you are compiling on a Windows platform, you may need to modify the 
+Makefile.win to select the CFLAGS line that matches your environment. 
+There are 2 compile time defines that you may need to set:
+
+    -D_LITTLE_ENDIAN    - for little endian platforms, ie: intel
+    -D_WINDOWS          - For Microsoft Visual C++/Windows 95.
+
+Once you have modified the Makefile for your environment, just run make.
+If you have problems with make, you can probably just compile the source
+files directly with something like this:
+
+    gcc -O *.c -o vanilla -lm
+
+One or more of the following may need to be defined within the gcc command 
+line for your platform: 
+
+    _WINDOWS            - for Windows95 compiler; this automatically defines
+                          _LITTLE_ENDIAN 
+    _LITTLE_ENDIAN      - for all other PC based compilers 
+    NEED_BASENAME       - for systems in which basename is not defined 
+    NEED_DIRNAME        - for systems in which dirname is not defined 
+    NEED_STRTOUL        - for systems in which strtoul is not defined 
+
+
