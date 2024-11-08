@@ -1,0 +1,18 @@
+PDS_VERSION_ID                   = PDS3
+RECORD_TYPE                      = STREAM
+OBJECT                           = TEXT
+  PUBLICATION_DATE               = 1999-05-14
+  NOTE                           = "Description of the DOC
+     directory contents for a MGS TES-TSDR archive volume."
+END_OBJECT                       = TEXT
+END
+ 
+                        DOC Directory Contents
+ 
+     The DOC directory contains documentation files for using the data on the
+TES-TSDR archive volume.  The files listed below are found in this directory.
+ 
+DOCINFO.TXT -   The file you are reading.
+
+USERDOC.TXT -   User guide for vanilla software.
+

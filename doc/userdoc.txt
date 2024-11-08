@@ -1,0 +1,342 @@
+PDS_VERSION_ID                = PDS3
+RECORD_TYPE                   = STREAM
+OBJECT                        = TEXT
+  PUBLICATION_DATE            = 2002-01-01
+  NOTE                        = "User documentation for vanilla software."
+END_OBJECT                    = TEXT
+END
+ 
+ 
+              Vanilla User Guide
+
+
+1.0 Introduction
+
+The vanilla program is a command line program that reads the binary
+TES TSDR file format, correlates data between the various tables, and
+outputs the data as columns of ASCII values.  Vanilla can also search
+the data for records that match a user specified criteria.
+
+Vanilla uses a dataset.lst file to identify the data files it is to work
+with, and treats those files as a set of tables constituting a
+relational database.  Each table contains several columns of data, and
+records are related from table to table by having the same values in
+key columns.
+
+
+2.0 Usage
+
+The usage for vanilla is:
+
+    vanilla directory  -fields "col1 col2 ..." -select "select1 select2 ..."
+
+The meaning of each of the arguments is explained below.
+
+    directory
+
+        This argument is required and must be the absolute or relative
+        path to a directory containing a dataset.lst file.
+
+    -fields "col1 col2 ..."
+
+        This argument is required and identifies the table columns to
+        output.  The list of columns must be presented as a single
+        string, and so, must be enclosed in quotes if more than one
+        column is given.  A brief list of the column names are given in
+        Appendix A.1 below;  detailed information for each column,
+        including a complete description, can be found in the TES TSDR
+        Data Archive SIS, or in the individual .fmt files located with
+        the data.  The format of a column identifier is:
+
+           table.column[index]
+
+        Where the 'table' and '[index]' portions are optional.  Column
+        identifiers are separated by spaces, so no spaces are allowed
+        within a column identifier.
+
+        The table prefix is only necessary when multiple tables
+        contain columns with the same name (such as key columns).  If
+        the table prefix is not specified, the first table listed in
+        the dataset.lst file that contains the named column is assumed.
+
+        It is possible for some columns in PDS tables to be specified
+        as containing an array of homogeneous data elements.  For these
+        array columns, the optional [index] is used to specifies which
+        element(s) of the array to extract.  The index can be a single
+        number, indicating a single element of the array, or a range
+        of numbers (specified by [low:high]), indicating multiple
+        consecutive elements.  If the user specifies the name of an
+        array column and does not specify an index or leaves it blank
+        (eg: column[]), the entire array is output.
+
+        Some columns are composed of multiple bit fields. If only the 
+        bit column is specified, the entire "bit word" is output as an 
+        integer number;  in most cases, this is probably not desirable. 
+        To extract a single bit field, the column should be specified by 
+        column:bit_column.
+
+        All variable length arrays require at least an empty index
+        (ie: name[]).  Leaving off the index extracts the variable
+        length data pointer, (the position of the variable length data
+        in its file).
+
+        If columns from multiple tables are specified, an inner join
+        is performed between all the tables involved and only those
+        records that exist in all of the tables specified are output.
+
+
+    -select "select1 select2 ..."
+
+        This argument is optional and specifies a selection criteria
+        that a record must meet before it is output.  Like the -fields
+        argument, all the selection criteria must be presented to
+        vanilla as a single string and so must be enclosed in quotes.
+        The format for a selection is as follows:
+
+            table.column[index] lowvalue highvalue
+
+        Like the -fields options, the 'table' and '[index]' portions
+        are optional and carry the same meaning, however with or
+        without the '[index]' portion, the column identifier must
+        specify only a single data element (e.g: the [low:high] format
+        for index is not allowed, and omitting the index is not
+        allowed for arrays).  
+
+        The low_value and high_value portions of the selection specify
+        a range that the column value must lie within before a record
+        is output.  Records that don't meet all the selection criteria
+        discarded.  The ranges are inclusive; a value must satisfy the
+        following relation for the record to be considered for output:
+
+             lowvalue <= column value <= highvalue
+
+        If a column is specified multiple times, the selection criteria
+        are evaluated as an "OR" compound expression which returns records 
+        that meet either of the selection criteria.
+
+        If the column contains a character value, the comparison is
+        lexigraphical.
+
+3.0 Examples
+
+The following command extracts the derived target temperature for each
+detector, with the latitude and longitude at the center of the
+detector:
+
+    vanilla . -fields "target_temperature detector latitude longitude"
+
+The '.' means the current directory.
+
+To perform the same search but limit the output to those observations
+with a phase angle of less than 45 degrees, and within +/- 20 degrees 
+of Isidis Planitia (lon 270, lat 15):
+
+    vanilla . -fields "target_temperature detector latitude longitude" \
+        -select "phase_angle 0 45 longitude 250 290 latitude -5 35"
+
+The TES spectra are stored in an array.  You can extract a portion of the
+array or the whole thing by using the range operator [low:hi] after the 
+field name.  The following command extracts all the spectra in the area
+around Isidis Major, where the target temperature was above 240 degrees 
+Kelvin:
+
+    vanilla . -fields "detector latitude longitude calibrated_radiance[]" \
+        -select "target_temperature 240 999 longitude 250 290 latitude -5 35"
+
+The [] are necessary for fields that are variable length arrays.  Otherwise
+you get a single value, a pointer to the array, which is probably not what 
+you want.
+
+The following command also searches for spectra around Isidis Major, but
+limits the output to spectra collected either by detector 2 or 5: 
+
+    vanilla . -fields "detector latitude longitude calibrated_radiance[]" \
+        -select "detector 2 2 detector 5 5 target_temperature 240 999 \ 
+         longitude 250 290 latitude -5 35"
+
+Another option in searching for spectra around Isidis Major, is to limit 
+the output with quality parameters;  the following command extracts only 
+those observations collected when the solar panels were not moving (quality 
+code value=1): 
+
+    vanilla . -fields "detector latitude longitude calibrated_radiance[]" \
+        -select "target_temperature 240 999 longitude 250 290 \ 
+        latitude -5 35 quality:solar_panel_motion 1 1"
+
+
+4.0 System Specifics
+
+A version of vanilla has been developed for use under Windows 95/98.
+It is run from the command line of a MS-DOS window.  The default 
+MS-DOS command line is only 127 characters, so entering long vanilla 
+commands may be difficult.  There are 2 methods that will allow you
+to enter longer commands:
+
+   1)  Enter the command into a .BAT file and run the file.
+
+   2)  Modify the parameters on your MS-DOS prompt window to run
+       the command.com with the parameter /u:250.  To do this under 
+       windows '95, right click on the title bar of a MS-DOS prompt,
+       and select Parameters from the menu.  Add /u:250 to the end
+       of the "Cmd line" box and click on OK.  Close and restart the
+       MS-DOS window.
+
+
+A.  Appendix
+
+A.1   Column Name Table
+
+Column Name                                      FMT File
+
+ AEROSOL_OPACITY_PROFILE_LIMB                     LMB.FMT
+ AEROSOL_OPACITY_SPECTRUM_LIMB                    LMB.FMT
+ AEROSOL_SNG_SCAT_ALB_SPECTRUM                    LMB.FMT
+ AEROSOL_SNG_SCAT_PRES_LEVEL_IND                  LMB.FMT
+ ATMOSPHERIC_CALIBRATION_ID                       ATM.FMT
+ AUXILIARY_DIAGNOSTIC_TEMPS                       TLM.FMT
+ BOLOMETRIC_BRIGHTNESS_TEMP                       BOL.FMT
+ BOLOMETRIC_THERMAL_INERTIA                       BOL.FMT
+ CALIBRATED_RADIANCE                              RAD.FMT
+ CALIBRATED_VISUAL_BOLOMETER                      BOL.FMT
+ CO2_DOWNWELLING_FLUX                             ATM.FMT
+ CO2_CONTINUUM_TEMP                               ATM.FMT
+ COMPRESSION_MODE                                 RAD.FMT
+ DATA_PACKET_TYPE                                 OBS.FMT
+ DETECTOR_MASK                                    OBS.FMT
+ DETECTOR_NUMBER                                  BOL.FMT
+ DETECTOR_NUMBER                                  CMP.FMT
+ DETECTOR_NUMBER                                  GEO.FMT
+ DETECTOR_NUMBER                                  IFG.FMT
+ DETECTOR_NUMBER                                  RAD.FMT
+ DETECTOR_TEMPERATURE                             RAD.FMT
+ DIAGNOSTIC_TELEMETRY_1                           TLM.FMT
+ DIAGNOSTIC_TELEMETRY_2                           TLM.FMT
+ DIAGNOSTIC_TELEMETRY_3                           TLM.FMT
+ DIAGNOSTIC_TELEMETRY_4                           TLM.FMT
+ DIAGNOSTIC_TELEMETRY_5                           TLM.FMT
+ DIAGNOSTIC_TELEMETRY_6                           TLM.FMT
+ DIAGNOSTIC_TELEMETRY_7                           TLM.FMT
+ DIAGNOSTIC_TELEMETRY_8                           TLM.FMT
+ DIAGNOSTIC_TELEMETRY_9                           TLM.FMT
+ DIAGNOSTIC_TELEMETRY_10                          TLM.FMT
+ DIAGNOSTIC_TELEMETRY_11                          TLM.FMT
+ DIAGNOSTIC_TELEMETRY_12                          TLM.FMT
+ DIAGNOSTIC_TELEMETRY_13                          TLM.FMT
+ DIAGNOSTIC_TELEMETRY_14                          TLM.FMT
+ DIAGNOSTIC_TELEMETRY_15                          TLM.FMT
+ DIAGNOSTIC_TELEMETRY_16                          TLM.FMT
+ DIAGNOSTIC_TELEMETRY_17                          TLM.FMT
+ DIAGNOSTIC_TELEMETRY_18                          TLM.FMT
+ DIAGNOSTIC_TELEMETRY_19                          TLM.FMT
+ DIAGNOSTIC_TELEMETRY_20                          TLM.FMT
+ EMISSION_ANGLE                                   GEO.FMT
+ EMISSIVITY                                      (virtual)
+ EPHEMERIS_TIME                                   POS.FMT
+ FFT_COMPLEX_DATA                                 CMP.FMT
+ FFT_START_INDEX                                  OBS.FMT
+ GEOMETRY_CALIBRATION_ID                          GEO.FMT
+ IMC_COUNT                                        OBS.FMT
+ INCIDENCE_ANGLE                                  GEO.FMT
+ INSTRUMENT_TIME_COUNT                            OBS.FMT
+ INTERFEROGRAM_DATA                               IFG.FMT
+ INTERFEROGRAM_END                                TLM.FMT
+ INTERFEROGRAM_MAXIMUM                            TLM.FMT
+ INTERFEROGRAM_MINIMUM                            TLM.FMT
+ INTERFEROGRAM_ZPD                                TLM.FMT
+ IRTM                                            (virtual)
+ LAMBERT_ALBEDO                                   BOL.FMT
+ LATITUDE                                         GEO.FMT
+ LIMB_PARAMETERS_QUALITY                          LMB.FMT
+ LIMB_TEMPERATURE_PROFILE                         LMB.FMT
+ LOCAL_TIME                                       GEO.FMT
+ LONGITUDE                                        GEO.FMT
+ MIRROR_POINTING_ANGLE                            OBS.FMT
+ NADIR_OPACITY                                    ATM.FMT
+ NADIR_OPACITY_RESIDUAL                           ATM.FMT
+ NADIR_TEMPERATURE_PROFILE                        ATM.FMT
+ NEON_AMPLITUDE                                   TLM.FMT
+ NEON_GAIN                                        TLM.FMT
+ NEON_LAMP                                        TLM.FMT
+ NEON_ZPD                                         TLM.FMT
+ OBSERVATION_CLASSIFICATION                       OBS.FMT
+ OBSERVATION_CLASSIFICATION:CLASSIFICATION_VALUE  OBS.FMT
+ OBSERVATION_CLASSIFICATION:INTENDED_TARGET       OBS.FMT
+ OBSERVATION_CLASSIFICATION:MISSION_PHASE         OBS.FMT
+ OBSERVATION_CLASSIFICATION:NEON_LAMP_STATUS      OBS.FMT
+ OBSERVATION_CLASSIFICATION:SPARE                 OBS.FMT
+ OBSERVATION_CLASSIFICATION:TES_SEQUENCE          OBS.FMT
+ OBSERVATION_CLASSIFICATION:TIMING_ACCURACY       OBS.FMT
+ OBSERVATION_TYPE                                 OBS.FMT
+ ONBOARD_PROCESSING_EVENT_LOG                     TLM.FMT
+ ORBIT_COUNTER_KEEPER                             OBS.FMT
+ ORBIT_NUMBER                                     OBS.FMT
+ PHASE_ANGLE                                      GEO.FMT
+ PLANETARY_ANGULAR_RADIUS                         GEO.FMT
+ PLANETARY_PHASE_ANGLE                            GEO.FMT
+ POSITION_SOURCE_ID                               POS.FMT
+ PREPROCESSOR_DETECTOR_NUMBER                     OBS.FMT
+ PRIMARY_DIAGNOSTIC_TEMPERATURES                  OBS.FMT
+ QUALITY                                          BOL.FMT
+ QUALITY                                          OBS.FMT
+ QUALITY                                          RAD.FMT
+ QUALITY:ALGOR_PATCH                              OBS.FMT
+ QUALITY:ALGOR_RISK                               RAD.FMT
+ QUALITY:ATMOSPHERIC_OPACITY_RATING               ATM.FMT
+ QUALITY:BOLOMETER_LAMP_ANOMALY                   BOL.FMT
+ QUALITY:BOLOMETRIC_INERTIA_RATING                BOL.FMT
+ QUALITY:CALIBRATION_QUALITY                      RAD.FMT
+ QUALITY:EQUALIZATION_TABLE                       OBS.FMT
+ QUALITY:DETECTOR_MASK_PROBLEM                    RAD.FMT
+ QUALITY:HGA_MOTION                               OBS.FMT
+ QUALITY:IMC_PATCH                                OBS.FMT
+ QUALITY:MAJOR_PHASE_INVERSION                    RAD.FMT
+ QUALITY:MOMENTUM_DESATURATION                    OBS.FMT
+ QUALITY:SOLAR_PANEL_MOTION                       OBS.FMT
+ QUALITY:SPECTRAL_INERTIA_RATING                  RAD.FMT
+ QUALITY:SPECTROMETER_NOISE                       RAD.FMT
+ QUALITY:TEMPERATURE_PROFILE_RATING               ATM.FMT
+ RADIANCE_CALIBRATION_ID                          RAD.FMT
+ RAW_RADIANCE                                     RAD.FMT
+ RAW_THERMAL_BOLOMETER                            BOL.FMT
+ RAW_VISUAL_BOLOMETER                             BOL.FMT
+ SCAN_LENGTH                                      OBS.FMT
+ SCHEDULE_TYPE                                    OBS.FMT
+ SOLAR_DISTANCE                                   GEO.FMT
+ SOLAR_LONGITUDE                                  GEO.FMT
+ SPACECRAFT_ALTITUDE                              GEO.FMT
+ SPACECRAFT_CLOCK_START_COUNT                     ATM.FMT
+ SPACECRAFT_CLOCK_START_COUNT                     BOL.FMT
+ SPACECRAFT_CLOCK_START_COUNT                     CMP.FMT
+ SPACECRAFT_CLOCK_START_COUNT                     GEO.FMT
+ SPACECRAFT_CLOCK_START_COUNT                     IFG.FMT
+ SPACECRAFT_CLOCK_START_COUNT                     LMB.FMT
+ SPACECRAFT_CLOCK_START_COUNT                     OBS.FMT
+ SPACECRAFT_CLOCK_START_COUNT                     POS.FMT
+ SPACECRAFT_CLOCK_START_COUNT                     RAD.FMT
+ SPACECRAFT_CLOCK_START_COUNT                     TLM.FMT
+ SPACECRAFT_POSITION                              POS.FMT
+ SPACECRAFT_QUATERNION                            POS.FMT
+ SPECTRAL_MASK                                    RAD.FMT
+ SPECTRAL_SURFACE_TEMPERATURE                     ATM.FMT
+ SPECTRAL_THERMAL_INERTIA                         RAD.FMT
+ SPECTROMETER_GAIN                                OBS.FMT
+ SUB_SOLAR_LATITUDE                               GEO.FMT
+ SUB_SOLAR_LONGITUDE                              GEO.FMT
+ SUB_SPACECRAFT_LATITUDE                          GEO.FMT
+ SUB_SPACECRAFT_LONGITUDE                         GEO.FMT
+ SUN_POSITION                                     POS.FMT
+ SURFACE_PRESSURE                                 ATM.FMT
+ SURFACE_RADIANCE                                 ATM.FMT
+ SURFACE_RAD_SPECTRUM_UNCERTAINTY                 LMB.FMT
+ TARGET_ALTITUDE                                  GEO.FMT
+ TARGET_DISTANCE                                  GEO.FMT
+ TARGET_TEMPERATURE                               RAD.FMT
+ TEMPERATURE_PROFILE_RESIDUAL                     ATM.FMT
+ TEMPORAL_AVERAGE_COUNT                           OBS.FMT
+ TEMPORAL_INTEGRATION_SCAN_NUMBER                 BOL.FMT
+ THERMAL_BOL_CALIBRATION_ID                       BOL.FMT
+ THERMAL_BOLOMETER_GAIN                           OBS.FMT
+ TOTAL_DOWNWELLING_FLUX                           ATM.FMT
+ VISUAL_BOL_CALIBRATION_ID                        BOL.FMT
+ VISUAL_BOLOMETER_GAIN                            OBS.FMT
+

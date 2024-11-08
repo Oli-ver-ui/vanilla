@@ -1,0 +1,41 @@
+PDS_VERSION_ID                   = PDS3
+RECORD_TYPE                      = STREAM
+OBJECT                           = TEXT
+  PUBLICATION_DATE               = 2000-08-08
+  NOTE                           = "Description of the SOFTWARE
+     directory contents for a MGS TES-TSDR archive volume."
+END_OBJECT                       = TEXT
+END
+
+                   SOFTWARE Directory Contents
+
+     The SOFTWARE directory contains software files for using the data on the
+TES-TSDR archive volume.  The files and subdirectories listed below are found
+in this directory.
+
+SOFTINFO.TXT -  The file you are reading.
+
+BIN - Subdirectory containing binary versions of the software.
+
+DOC - Subdirectory containing documentation about the software.
+
+SRC - Subdirectory containing source code for the software.
+
+
+
+
+                     Notes on Getting Started
+                     ------------------------
+The TES data available on this volume is most easily manipulated with the 
+Vanilla software included in the above subdirectories.  
+SOFTWARE/BIN/BININFO.TXT lists the variety of systems for which compiled
+binary executables are available;  instructions for executing the binary are 
+also given in SOFTWARE/BIN/BININFO.TXT.  If your system is not supported, the
+source codes for compiling your own version of Vanilla are available in 
+SOFTWARE/SRC/; compiling instructions are given in SOFTWARE/SRC/SRCINFO.TXT.
+
+In the case that you are unsure if one of the SOFTWARE/BIN/ executables will 
+actually work with your system, we suggest that you first attempt to run the
+executable before plowing through the source code;  you may be pleasantly 
+surprised.  
+

@@ -1,0 +1,56 @@
+PDS_VERSION_ID                   = PDS3
+RECORD_TYPE                      = STREAM
+OBJECT                           = TEXT
+  PUBLICATION_DATE               = 2005-07-15
+  NOTE                           = "Description of the BIN directory
+                                    contents for a MGS TES-TSDR archive 
+                                    volume."
+END_OBJECT                       = TEXT
+END
+ 
+                       BIN Directory Contents
+ 
+     The BIN directory contains executable software files for using the
+data on the TES-TSDR archive volume.  The files listed below are found
+in this directory.
+
+BININFO.TXT -   The file you are reading.
+
+
+The files listed below are executables of the vanilla program, precompiled
+for the following platforms:
+
+irix.exe      - SGI Origin 2000 (mips), IRIX 6.5, gcc
+
+linux.exe     - PC (i386), Fedora Core 1, gcc
+
+rs6k.exe      - IBM RS/6000 (PPC), AIX V4.3.3
+
+solsparc.exe  - Sun Sparc, Solaris 7, gcc 
+
+wintel.exe    - PC, Windows2000/NT/98/95, Microsoft Visual C++
+
+If no compiler is specified, then the system supplied compiler was used.
+Where possible, these executables were compiled statically, to avoid 
+shared library version problems.
+
+
+
+
+                      Notes on Executing Vanilla
+                      --------------------------
+All of the above executables are copies of the Vanilla software, named by 
+the system for which they were compiled.  To operate Vanilla on your system, 
+follow these steps: 
+  -copy the appropriate executable to your system into a common directory 
+   for everyone to access 
+  -rename the executable file "vanilla.exe" for Windows systems, or 
+   "vanilla" for all other systems 
+  -check that the file permissions are executable for everyone; modify the 
+   permissions if necessary 
+  -include the executable in your PATH variable (i.e. use the command 
+   rehash for C shell systems) 
+
+Vanilla commands can now be run following the instructions given in 
+/SOFTWARE/DOC/USERDOC.TXT.
+
